@@ -1,0 +1,97 @@
+package com.example.supercompras
+
+import android.content.Intent
+import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+import com.example.supercompras.model.ListaSupermercado
+import com.example.supercompras.repository.ListaRepository
+
+
+class RealizarComprasActivity : AppCompatActivity() {
+
+    private lateinit var lista: ListaSupermercado
+    private lateinit var layoutItens: LinearLayout
+    private lateinit var tvTotalGasto: TextView
+    private lateinit var tvSaldoRestante: TextView
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_realizar_compras)
+
+        val listaId = intent.getIntExtra("listaId", -1)
+        val listaEncontrada = ListaRepository.getListaById(listaId)
+
+        if (listaEncontrada == null) {
+            Toast.makeText(this, "Lista não encontrada", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+
+        lista = listaEncontrada
+
+        layoutItens = findViewById(R.id.layoutItens)
+        tvTotalGasto = findViewById(R.id.tvTotalGasto)
+        tvSaldoRestante = findViewById(R.id.tvSaldoRestante)
+
+        findViewById<Button>(R.id.btnAdicionarMaisItens).setOnClickListener {
+            val intent = Intent(this, CadastroItemActivity::class.java)
+            intent.putExtra("listaId", lista.id)
+            startActivity(intent)
+        }
+
+        renderizarItens()
+        atualizarResumo()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        renderizarItens()
+        atualizarResumo()
+    }
+
+    private fun renderizarItens() {
+        layoutItens.removeAllViews()
+
+        for (item in lista.itens) {
+            val itemLayout = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                setPadding(0, 8, 0, 8)
+            }
+
+            val tvNome = TextView(this).apply {
+                text = item.nome
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            }
+
+            val etValor = EditText(this).apply {
+                hint = "R$"
+                setText(if (item.valor > 0) item.valor.toString() else "")
+                inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+
+                addTextChangedListener(object : TextWatcher {
+                    override fun afterTextChanged(s: Editable?) {
+                        val novoValor = s.toString().toDoubleOrNull() ?: 0.0
+                        item.valor = novoValor
+                        atualizarResumo()
+                    }
+
+                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                })
+            }
+
+            itemLayout.addView(tvNome)
+            itemLayout.addView(etValor)
+            layoutItens.addView(itemLayout)
+        }
+    }
+
+    private fun atualizarResumo() {
+        tvTotalGasto.text = "Total Gasto: R$ %.2f".format(lista.totalGasto())
+        tvSaldoRestante.text = "Saldo Restante: R$ %.2f".format(lista.saldoRestante())
+    }
+}
