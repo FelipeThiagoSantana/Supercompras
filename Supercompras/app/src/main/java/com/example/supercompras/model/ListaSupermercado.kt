@@ -6,6 +6,6 @@ data class ListaSupermercado(
     val valorLimite: Double,
     val itens: MutableList<Item> = mutableListOf()
 ) {
-    fun totalGasto(): Double = itens.sumOf { it.valor }
+    fun totalGasto(): Double = itens.sumOf { it.valor * it.quantidade }
     fun saldoRestante(): Double = valorLimite - totalGasto()
 }

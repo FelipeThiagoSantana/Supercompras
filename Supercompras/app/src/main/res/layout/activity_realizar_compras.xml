@@ -6,37 +6,37 @@
     android:padding="16dp">
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
         <LinearLayout
             android:id="@+id/layoutItens"
-            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
 
         <TextView
             android:id="@+id/tvTotalGasto"
-            android:text="Total Gasto: R$ 0.00"
-            android:textSize="18sp"
-            android:layout_marginTop="16dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Total Gasto: R$ 0.00"
+            android:textSize="18sp" />
 
         <TextView
             android:id="@+id/tvSaldoRestante"
-            android:text="Saldo Restante: R$ 0.00"
-            android:textSize="18sp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:text="Saldo Restante: R$ 0.00"
+            android:textSize="18sp" />
 
         <Button
             android:id="@+id/btnAdicionarMaisItens"
-            android:text="Adicionar Novo Item"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginTop="16dp"
+            android:text="Adicionar Novo Item" />
 
     </LinearLayout>
 </ScrollView>

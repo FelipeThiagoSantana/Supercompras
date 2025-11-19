@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.supercompras.model.ListaSupermercado
 import com.example.supercompras.repository.ListaRepository
 
-
 class RealizarComprasActivity : AppCompatActivity() {
 
     private lateinit var lista: ListaSupermercado
@@ -22,15 +21,12 @@ class RealizarComprasActivity : AppCompatActivity() {
         setContentView(R.layout.activity_realizar_compras)
 
         val listaId = intent.getIntExtra("listaId", -1)
-        val listaEncontrada = ListaRepository.getListaById(listaId)
-
-        if (listaEncontrada == null) {
-            Toast.makeText(this, "Lista não encontrada", Toast.LENGTH_SHORT).show()
-            finish()
-            return
-        }
-
-        lista = listaEncontrada
+        lista = ListaRepository.getListaById(listaId)
+            ?: run {
+                Toast.makeText(this, "Lista não encontrada", Toast.LENGTH_SHORT).show()
+                finish()
+                return
+            }
 
         layoutItens = findViewById(R.id.layoutItens)
         tvTotalGasto = findViewById(R.id.tvTotalGasto)
@@ -66,9 +62,10 @@ class RealizarComprasActivity : AppCompatActivity() {
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
             }
 
+            // CAMPO VALOR UNITÁRIO
             val etValor = EditText(this).apply {
                 hint = "R$"
-                setText(if (item.valor > 0) item.valor.toString() else "")
+                setText(item.valor.toString())
                 inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
 
@@ -77,8 +74,27 @@ class RealizarComprasActivity : AppCompatActivity() {
                         val novoValor = s.toString().toDoubleOrNull() ?: 0.0
                         item.valor = novoValor
                         atualizarResumo()
+                        ListaRepository.notificarAlteracaoDeDados()
                     }
+                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                })
+            }
 
+            // CAMPO QUANTIDADE
+            val etQuantidade = EditText(this).apply {
+                hint = "Qtd"
+                setText(item.quantidade.toString())
+                inputType = android.text.InputType.TYPE_CLASS_NUMBER
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+
+                addTextChangedListener(object : TextWatcher {
+                    override fun afterTextChanged(s: Editable?) {
+                        val novaQtd = s.toString().toIntOrNull() ?: 1
+                        item.quantidade = novaQtd
+                        atualizarResumo()
+                        ListaRepository.notificarAlteracaoDeDados()
+                    }
                     override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                     override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                 })
@@ -86,6 +102,8 @@ class RealizarComprasActivity : AppCompatActivity() {
 
             itemLayout.addView(tvNome)
             itemLayout.addView(etValor)
+            itemLayout.addView(etQuantidade)
+
             layoutItens.addView(itemLayout)
         }
     }

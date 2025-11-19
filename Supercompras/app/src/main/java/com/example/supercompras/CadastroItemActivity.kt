@@ -31,19 +31,36 @@ class CadastroItemActivity : AppCompatActivity() {
         listaView.adapter = adapter
 
         val etNomeItem = findViewById<EditText>(R.id.etNomeItem)
+        val etQuantidadeItem = findViewById<EditText>(R.id.etQuantidadeItem)
+        val etValorItem = findViewById<EditText>(R.id.etValorItem)
         val btnAdicionarItem = findViewById<Button>(R.id.btnAdicionarItem)
 
         btnAdicionarItem.setOnClickListener {
+
             val nome = etNomeItem.text.toString()
-            if (nome.isNotBlank()) {
-                val item = Item(nome)
-                lista.itens.add(item)
-                nomesItens.add(nome)
-                adapter.notifyDataSetChanged()
-                etNomeItem.text.clear()
-            } else {
+            val quantidade = etQuantidadeItem.text.toString().toIntOrNull() ?: 1
+            val valor = etValorItem.text.toString().toDoubleOrNull() ?: 0.0
+
+            if (nome.isBlank()) {
                 Toast.makeText(this, "Digite o nome do item", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
+
+            val item = Item(
+                nome = nome,
+                quantidade = quantidade,
+                valor = valor
+            )
+
+            lista.itens.add(item)
+            ListaRepository.notificarAlteracaoDeDados()
+
+            nomesItens.add("${item.nome} (x${item.quantidade})")
+            adapter.notifyDataSetChanged()
+
+            etNomeItem.text.clear()
+            etQuantidadeItem.text.clear()
+            etValorItem.text.clear()
         }
 
         atualizarLista(lista)
@@ -52,7 +69,7 @@ class CadastroItemActivity : AppCompatActivity() {
     private fun atualizarLista(lista: com.example.supercompras.model.ListaSupermercado) {
         nomesItens.clear()
         lista.itens.forEach {
-            nomesItens.add(it.nome)
+            nomesItens.add("${it.nome} (x${it.quantidade})")
         }
         adapter.notifyDataSetChanged()
     }
